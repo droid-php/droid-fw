@@ -8,8 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Droid\Model\Inventory;
-use Droid\Plugin\Fw\Model\Firewall;
-use Droid\Plugin\Fw\Loader\YamlLoader;
+use Droid\Model\Firewall;
+use Droid\Plugin\Fw\Generator\UfwGenerator;
 use RuntimeException;
 
 class FwGenerateCommand extends Command
@@ -23,12 +23,6 @@ class FwGenerateCommand extends Command
                 InputArgument::REQUIRED,
                 'Name of the host to generate the firewall for'
             )
-            ->addOption(
-                'config',
-                'c',
-                InputOption::VALUE_REQUIRED,
-                'YAML config file with firewall rules'
-            )
         ;
     }
     
@@ -41,21 +35,18 @@ class FwGenerateCommand extends Command
     
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $config = $input->getOption('config');
         $hostname = $input->getArgument('hostname');
-        if (!$config) {
-            throw new RuntimeException("Firewall config not defined (use --config).");
-        }
+
         $output->writeLn("Generating firewall for: " . $input->getArgument('hostname'));
         if (!$this->inventory) {
             throw new RuntimeException("Inventory not defined.");
         }
         
         $firewall = new Firewall($this->inventory);
-        $loader = new YamlLoader();
-        $loader->load($firewall, $config);
         
         $rules = $firewall->getRulesByHostname($hostname);
-        print_r($rules);
+        $generator = new UfwGenerator($firewall);
+        $o = $generator->generate($hostname);
+        echo $o;
     }
 }
