@@ -25,14 +25,14 @@ class FwGenerateCommand extends Command
             )
         ;
     }
-    
+
     protected $inventory;
-    
+
     public function setInventory(Inventory $inventory)
     {
         $this->inventory = $inventory;
     }
-    
+
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $hostname = $input->getArgument('hostname');
@@ -41,9 +41,9 @@ class FwGenerateCommand extends Command
         if (!$this->inventory) {
             throw new RuntimeException("Inventory not defined.");
         }
-        
+
         $firewall = new Firewall($this->inventory);
-        
+
         $rules = $firewall->getRulesByHostname($hostname);
         $generator = new UfwGenerator($firewall);
         $o = $generator->generate($hostname);
