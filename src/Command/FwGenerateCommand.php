@@ -2,15 +2,16 @@
 
 namespace Droid\Plugin\Fw\Command;
 
+use RuntimeException;
+
+use Droid\Model\Feature\Firewall\Firewall;
+use Droid\Model\Inventory\Inventory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Droid\Model\Inventory;
-use Droid\Model\Firewall;
+
 use Droid\Plugin\Fw\Generator\UfwGenerator;
-use RuntimeException;
 
 class FwGenerateCommand extends Command
 {

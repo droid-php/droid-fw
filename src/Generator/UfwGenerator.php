@@ -2,8 +2,8 @@
 
 namespace Droid\Plugin\Fw\Generator;
 
-use Droid\Model\Firewall;
-use Droid\Model\Rule;
+use Droid\Model\Feature\Firewall\Firewall;
+use Droid\Model\Feature\Firewall\Rule;
 
 class UfwGenerator
 {
