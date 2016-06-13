@@ -17,6 +17,7 @@
         "symfony/console": "~2.7"
     },
     "require-dev": {
+        "mikey179/vfsStream": "^1.6",
         "linkorb/autotune": "~1.0"
     },
     "autoload": {
