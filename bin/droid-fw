@@ -3,6 +3,8 @@
 
 use Symfony\Component\Console\Application;
 
+use Droid\Plugin\Fw\DroidPlugin;
+
 $loader = __DIR__ . '/../vendor/autoload.php';
 
 if (!file_exists($loader)) {
@@ -21,5 +23,8 @@ require $loader;
 
 $application = new Application('Droid FW', '1.0.0');
 $application->setCatchExceptions(true);
-$application->add(new Droid\Plugin\Fw\Command\FwGenerateCommand());
+$registry = new DroidPlugin($application);
+foreach ($registry->getCommands() as $command) {
+    $application->add($command);
+}
 $application->run();
