@@ -3,6 +3,7 @@
 namespace Droid\Plugin\Fw;
 
 use Droid\Plugin\Fw\Command\FwGenerateCommand;
+use Droid\Plugin\Fw\Command\FwInstallCommand;
 
 class DroidPlugin
 {
@@ -14,7 +15,8 @@ class DroidPlugin
     public function getCommands()
     {
         return array(
-            new FwGenerateCommand('/tmp')
+            new FwGenerateCommand(),
+            new FwInstallCommand('/tmp')
         );
     }
 }
