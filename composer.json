@@ -12,12 +12,13 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=5.4.0",
         "droid/droid-model": "~1.0",
         "symfony/console": "~2.7"
     },
     "require-dev": {
         "mikey179/vfsStream": "^1.6",
+        "phpunit/phpunit": "^4.8",
         "linkorb/autotune": "~1.0"
     },
     "autoload": {

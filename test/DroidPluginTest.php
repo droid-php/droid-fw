@@ -26,6 +26,7 @@ class DroidPluginTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(
             array(
                 'Droid\Plugin\Fw\Command\FwGenerateCommand',
+                'Droid\Plugin\Fw\Command\FwInstallCommand',
             ),
             array_map(
                 function ($x) {
