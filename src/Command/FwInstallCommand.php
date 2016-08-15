@@ -4,22 +4,29 @@ namespace Droid\Plugin\Fw\Command;
 
 use RuntimeException;
 
-use Droid\Model\Feature\Firewall\Firewall;
 use Droid\Model\Inventory\Inventory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Droid\Plugin\Fw\Generator\UfwGenerator;
+use Droid\Plugin\Fw\Generator\UfwGeneratorFactory;
 
 class FwInstallCommand extends Command
 {
     protected $inventory;
     protected $tempPath;
 
-    public function __construct($tempPath, $name = null)
-    {
+    private $fac;
+    private $generator;
+
+
+    public function __construct(
+        UfwGeneratorFactory $factory,
+        $tempPath,
+        $name = null
+    ) {
+        $this->fac = $factory;
         $this->tempPath = $tempPath;
         return parent::__construct($name);
     }
@@ -27,13 +34,28 @@ class FwInstallCommand extends Command
     public function configure()
     {
         $this->setName('fw:install')
-            ->setDescription('Install firewall on given host')
+            ->setDescription('Generate and install UFW firewall rules on an Inventory host or all Inventory hosts.')
             ->addArgument(
                 'hostname',
-                InputArgument::REQUIRED,
-                'Name of the host to generate and install the firewall for'
+                InputArgument::OPTIONAL,
+                'Name of a host for which to generate and install firewall rules'
             )
         ;
+    }
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        $hostArg = $input->getArgument('hostname');
+
+        if ($hostArg && ! $this->inventory->hasHost($hostArg)) {
+            throw new RuntimeException(
+                sprintf('I do not have a host named "%s" in my Inventory.', $hostArg)
+            );
+        } elseif (! $hostArg && ! $this->inventory->getHosts()) {
+            throw new RuntimeException(
+                'I do not have any hosts in my Inventory.'
+            );
+        }
     }
 
     public function setInventory(Inventory $inventory)
@@ -43,61 +65,84 @@ class FwInstallCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $host = $this->inventory->getHost($input->getArgument('hostname'));
+        $hosts = array();
 
-        $output->writeLn("Installing firewall for: " . $host->getName());
-        if (!$this->inventory) {
-            throw new RuntimeException("Inventory not defined.");
+        $hostArg = $input->getArgument('hostname');
+        if ($hostArg) {
+            $hosts[] = $this->inventory->getHost($hostArg);
+        } else {
+            $hosts = $this->inventory->getHosts();
         }
 
-        $firewall = new Firewall($this->inventory);
-        $generator = new UfwGenerator($firewall);
-        $script = $generator->generate($host->getName());
-        if ($script === null) {
-            throw new RuntimeException(
+        foreach ($hosts as $host) {
+            $script = null;
+            try {
+                $script = $this->getGenerator()->generate($host->getName());
+            } catch (RuntimeException $e) {
+                $output->writeLn(
+                    sprintf(
+                        '<error>I cannot generate rules for the host "%s": %s</error>',
+                        $host->getName(),
+                        $e->getMessage()
+                    )
+                );
+                continue;
+            }
+            if ($script === null) {
+                $output->writeLn(
+                    sprintf(
+                        '<comment>No rules are defined for, or apply to the host "%s".</comment>',
+                        $host->getName()
+                    )
+                );
+                continue;
+            }
+
+            $tempPath = $this->tempFilePath($host->getName());
+
+            $this->writeToFile($script, $tempPath);
+
+            $scpClient = $host->getScpClient();
+            $scpClient->copy($tempPath, $scpClient->getRemotePath($tempPath));
+            if ($scpClient->getExitCode()) {
+                throw new RuntimeException(
+                    sprintf(
+                        'I could not copy the script "%s" to the host "%s": %s',
+                        $tempPath,
+                        $host->getName(),
+                        $scpClient->getErrorOutput()
+                    )
+                );
+            }
+
+            $sshClient = $host->getSshClient();
+            $sshClient->exec(array('/bin/sh', $tempPath));
+            if ($sshClient->getExitCode()) {
+                throw new RuntimeException(
+                    sprintf(
+                        'I could not execute the script "%s" on the host "%s": %s',
+                        $tempPath,
+                        $host->getName(),
+                        $sshClient->getErrorOutput()
+                    )
+                );
+            }
+
+            $output->writeLn(
                 sprintf(
-                    'There are no rules defined for host "%s".',
+                    'I have successfully activated the firewall rules on host "%s".',
                     $host->getName()
                 )
             );
         }
+    }
 
-        $tempPath = $this->tempFilePath($host->getName());
-
-        $this->writeToFile($script, $tempPath);
-
-        $scpClient = $host->getScpClient();
-        $scpClient->copy($tempPath, $scpClient->getRemotePath($tempPath));
-        if ($scpClient->getExitCode()) {
-            throw new RuntimeException(
-                sprintf(
-                    'I could not copy the script "%s" to the host "%s": %s',
-                    $tempPath,
-                    $host->getName(),
-                    $scpClient->getErrorOutput()
-                )
-            );
+    private function getGenerator()
+    {
+        if (!$this->generator) {
+            $this->generator = $this->fac->makeUfwGenerator($this->inventory);
         }
-
-        $sshClient = $host->getSshClient();
-        $sshClient->exec(array('/bin/sh', $tempPath));
-        if ($sshClient->getExitCode()) {
-            throw new RuntimeException(
-                sprintf(
-                    'I could not execute the script "%s" on the host "%s": %s',
-                    $tempPath,
-                    $host->getName(),
-                    $sshClient->getErrorOutput()
-                )
-            );
-        }
-
-        $output->writeLn(
-            sprintf(
-                'I have successfully activated the firewall rules on host "%s".',
-                $host->getName()
-            )
-        );
+        return $this->generator;
     }
 
     private function tempFilePath($hostname)
