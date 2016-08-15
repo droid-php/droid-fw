@@ -163,7 +163,7 @@ class UfwGeneratorTest extends \PHPUnit_Framework_TestCase
         $ruleCmds = $g->generateRule($rule);
 
         $this->assertStringStartsWith(
-            'ufw reject proto udp from any to 0.0.0.0/0 port 53 #',
+            'ufw reject out proto udp from any to 0.0.0.0/0 port 53 #',
             $ruleCmds[0]
         );
     }
@@ -197,12 +197,12 @@ class UfwGeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $ruleCmds);
 
         $this->assertStringStartsWith(
-            'ufw reject proto udp from any to 203.0.113.1 port 53 #',
+            'ufw reject out proto udp from any to 203.0.113.1 port 53 #',
             $ruleCmds[0]
         );
 
         $this->assertStringStartsWith(
-            'ufw reject proto udp from any to 203.0.113.2 port 53 #',
+            'ufw reject out proto udp from any to 203.0.113.2 port 53 #',
             $ruleCmds[1]
         );
     }
