@@ -103,7 +103,13 @@ class FwInstallCommand extends Command
             $this->writeToFile($script, $tempPath);
 
             $scpClient = $host->getScpClient();
-            $scpClient->copy($tempPath, $scpClient->getRemotePath($tempPath));
+            $scpClient->copy(
+                $tempPath,
+                $scpClient->getRemotePath($tempPath),
+                null,
+                null,
+                true
+            );
             if ($scpClient->getExitCode()) {
                 throw new RuntimeException(
                     sprintf(
@@ -116,7 +122,7 @@ class FwInstallCommand extends Command
             }
 
             $sshClient = $host->getSshClient();
-            $sshClient->exec(array('/bin/sh', $tempPath));
+            $sshClient->exec(array('/bin/sh', $tempPath), null, null, true);
             if ($sshClient->getExitCode()) {
                 throw new RuntimeException(
                     sprintf(
