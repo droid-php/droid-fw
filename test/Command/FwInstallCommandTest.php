@@ -328,7 +328,10 @@ class FwInstallCommandTest extends \PHPUnit_Framework_TestCase
             ->method('copy')
             ->with(
                 $pathMatcher,
-                'some-remote-path'
+                $this->equalTo('some-remote-path'),
+                $this->identicalTo(null),
+                $this->identicalTo(null),
+                $this->identicalTo(true)
             )
         ;
         $this
@@ -343,7 +346,10 @@ class FwInstallCommandTest extends \PHPUnit_Framework_TestCase
                             'The path to the script is passed as the second arg to exec',
                             true
                         );
-                })
+                }),
+                $this->identicalTo(null),
+                $this->identicalTo(null),
+                $this->identicalTo(true)
             )
         ;
 
@@ -395,7 +401,10 @@ class FwInstallCommandTest extends \PHPUnit_Framework_TestCase
             ->method('copy')
             ->with(
                 $pathMatcher,
-                'some-remote-path'
+                $this->equalTo('some-remote-path'),
+                $this->identicalTo(null),
+                $this->identicalTo(null),
+                $this->identicalTo(true)
             )
         ;
         $this
@@ -410,7 +419,10 @@ class FwInstallCommandTest extends \PHPUnit_Framework_TestCase
                             'The path to the script is passed as the second arg to exec',
                             true
                         );
-                })
+                }),
+                $this->identicalTo(null),
+                $this->identicalTo(null),
+                $this->identicalTo(true)
             )
         ;
 
