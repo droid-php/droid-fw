@@ -25,7 +25,7 @@ class UfwGenerator
 
         $o[] = 'ufw --force reset';
 
-        foreach ($this->firewall->getPolicy() as $direction => $action) {
+        foreach ($this->firewall->getPolicyByHostname($hostname) as $direction => $action) {
             $o[] = sprintf('ufw default %s %s', $action, $direction);
         }
 

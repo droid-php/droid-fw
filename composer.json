@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "droid/droid-model": "~1.0",
+        "droid/droid-model": "~1.3",
         "symfony/console": "~2.7"
     },
     "require-dev": {
