@@ -70,7 +70,7 @@ class UfwGeneratorTest extends \PHPUnit_Framework_TestCase
         ;
         $this
             ->firewall
-            ->method('getPolicy')
+            ->method('getPolicyByHostname')
             ->willReturn(array('incoming' => 'deny'))
         ;
 

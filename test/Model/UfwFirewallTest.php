@@ -26,11 +26,11 @@ class UfwFirewallTest extends \PHPUnit_Framework_TestCase
         $this
             ->baseFirewall
             ->expects($this->once())
-            ->method('getPolicy')
+            ->method('getPolicyByHostname')
             ->willReturn(array())
         ;
 
-        $policy = $this->firewall->getPolicy();
+        $policy = $this->firewall->getPolicyByHostname('some-name');
 
         foreach (UfwFirewall::directions() as $direction) {
             $this->assertArrayHasKey(
@@ -58,13 +58,13 @@ class UfwFirewallTest extends \PHPUnit_Framework_TestCase
 
         $this
             ->baseFirewall
-            ->method('getPolicy')
+            ->method('getPolicyByHostname')
             ->willReturn($customPolicy)
         ;
 
         $this->assertSame(
             array_merge($defaultPolicy, $customPolicy),
-            $this->firewall->getPolicy()
+            $this->firewall->getPolicyByHostname('some-name')
         );
     }
 

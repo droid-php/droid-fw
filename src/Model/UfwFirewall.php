@@ -41,19 +41,27 @@ class UfwFirewall implements FirewallInterface
     }
 
     /**
-     * Get the default firewall policy, as a map of directions to actions.
+     * Get the default firewall policy for the named Host, as a map of
+     * directions to actions.
      *
      * The policy returned will be the "standard" policy (see standardPolicy)
      * merged with a policy obtained from Droid's Firewall.
      *
+     * @param string $name Name of a Host
+     *
      * @return array
      */
-    public function getPolicy()
+    public function getPolicyByHostname($name)
     {
         return array_merge(
             $this->standardPolicy(),
-            $this->firewall->getPolicy()
+            $this->firewall->getPolicyByHostname($name)
         );
+    }
+
+    public function getPolicy()
+    {
+        return $this->standardPolicy();
     }
 
     /**
