@@ -122,7 +122,7 @@ class FwInstallCommand extends Command
             }
 
             $sshClient = $host->getSshClient();
-            $sshClient->exec(array('/bin/sh', $tempPath), null, null, true);
+            $sshClient->exec(array('sudo /bin/sh', $tempPath), null, null, true);
             if ($sshClient->getExitCode()) {
                 throw new RuntimeException(
                     sprintf(
