@@ -55,19 +55,23 @@ class UfwGenerator
         $o = array();
         foreach ($addresses as $address) {
             $r = sprintf('ufw %s', $rule->getAction());
-            if ($rule->getDirection() == 'outbound') {
-                $r .= ' out';
-            }
-            if ($rule->getProtocol()) {
-                $r .= sprintf(' proto %s', $rule->getProtocol());
-            }
-            if ($rule->getDirection() == 'outbound') {
-                $r .= sprintf(' from any to %s', $address);
+            if ($rule->getCustom()) {
+                $r .= ' ' . $rule->getCustom();
             } else {
-                $r .= sprintf(' from %s to any', $address);
-            }
-            if ($rule->getPort()) {
-                $r .= sprintf(' port %d', $rule->getPort());
+                if ($rule->getDirection() == 'outbound') {
+                    $r .= ' out';
+                }
+                if ($rule->getProtocol()) {
+                    $r .= sprintf(' proto %s', $rule->getProtocol());
+                }
+                if ($rule->getDirection() == 'outbound') {
+                    $r .= sprintf(' from any to %s', $address);
+                } else {
+                    $r .= sprintf(' from %s to any', $address);
+                }
+                if ($rule->getPort()) {
+                    $r .= sprintf(' port %d', $rule->getPort());
+                }
             }
             $r .= ' ' . trim(sprintf('# [%s] %s', $rule->getAddress(), $rule->getComment()));
             $o[] = $r;
