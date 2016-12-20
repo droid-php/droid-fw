@@ -51,7 +51,11 @@ class UfwGenerator
      */
     public function generateRule(Rule $rule)
     {
-        $addresses = $this->firewall->constructAddresses($rule->getAddress());
+        if ($rule->getAddress()) {
+            $addresses = $this->firewall->constructAddresses($rule->getAddress());
+        } else {
+            $addresses = [''];
+        }
         $o = array();
         foreach ($addresses as $address) {
             $r = sprintf('ufw %s', $rule->getAction());
